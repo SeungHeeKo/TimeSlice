@@ -33,7 +33,7 @@ namespace TimeSlice
         string[] textValue, shareTextValue;
         string fileName = "";
         string fileExt = ".mp4";
-        string sendFile = "";
+        string sendFile = "2.mp4";
 
         int totalFile = 0;
 
@@ -52,6 +52,8 @@ namespace TimeSlice
         string serverURL = "";
         string serverID = "";
         string serverPW = "";
+
+        bool isShareFolder = false;
 
         public MainWindow()
         {
@@ -286,26 +288,35 @@ namespace TimeSlice
             _sendMailThread = new Thread(new ThreadStart(() =>
             {
                 EmailService emailService = new EmailService();
-                if (string.IsNullOrEmpty(sendFile))
-                    mailSuccess = false;
+
+
+                if (isShareFolder)
+                {
+                    if (string.IsNullOrEmpty(sendFile))
+                        mailSuccess = false;
+                    else
+                    {
+                        if (System.IO.File.Exists(filePath + sendFile))
+                        {
+                            try
+                            {
+                                mailSuccess = emailService.SendEmail(mailTo, filePath + sendFile);
+
+                            }
+
+                            catch (System.IO.IOException ex)
+                            {
+                                MessageBox.Show(ex.Message);
+                                ResetWindow();
+                            }
+                        }
+                        else
+                            mailSuccess = false;
+                    }
+                }
                 else
                 {
-                    if (System.IO.File.Exists(filePath + sendFile))
-                    {
-                        try
-                        {
-                            mailSuccess = emailService.SendEmail(mailTo, filePath + sendFile);
-                            
-                        }
-
-                        catch (System.IO.IOException ex)
-                        {
-                            MessageBox.Show(ex.Message);
-                            ResetWindow();
-                        }
-                    }
-                    else
-                        mailSuccess = false;
+                    mailSuccess = emailService.SendEmail(mailTo, filePath + sendFile);
                 }
 
                 ShowPopupMessage(mailSuccess);
@@ -315,8 +326,10 @@ namespace TimeSlice
             _sendMailThread.SetApartmentState(ApartmentState.STA);
             _sendMailThread.IsBackground = true;
 
-
-            connectShareFolder();
+            if (isShareFolder)
+                connectShareFolder();
+            else
+                _sendMailThread.Start();
         }
 
         private void mainWindow_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

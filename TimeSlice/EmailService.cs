@@ -28,10 +28,10 @@ namespace TimeSlice
                 smtpClient = new SmtpClient("smtp.gmail.com", 587);
                 smtpClient.UseDefaultCredentials = false;
                 smtpClient.EnableSsl = true;
-                smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+                //smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
                 smtpClient.Credentials = new NetworkCredential(senderMail, senderPassword);
                 
-                smtpClient.Timeout = 100000;
+                //smtpClient.Timeout = 100000;
                 mail.From = new MailAddress(senderMail, "KT 타임 슬라이스", System.Text.Encoding.UTF8);
                 mail.Subject = mailSubject;
                 mail.Body = "2018 KT Live Site - Ice Hockey Challenge";
