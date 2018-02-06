@@ -5,8 +5,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+
 
 namespace TimeSlice
 {
@@ -77,6 +79,13 @@ namespace TimeSlice
 
             string fileName = "";
 
+            int maxNum = 0;
+            MainWindow mainWindow = MainWindow.mainWindowInstance;
+            Char[] fileExt = mainWindow.fileExt.ToCharArray();
+            string[] fileName_Ext = new string[2];
+            string strTmp = "";
+            FileInfo fileToSend = files[files.Length -1];
+
             if (files != null)
             {
                 string strCurrentDirectory = System.IO.Directory.GetCurrentDirectory();
@@ -84,18 +93,36 @@ namespace TimeSlice
                 {
                     System.IO.Directory.CreateDirectory(resultFolder);
                 }
-                
+
                 foreach (FileInfo file in files)
                 {
-                    System.Diagnostics.Debug.Write(files[files.Length - 1].FullName);
-                    string strDest = resultFolder + files[files.Length - 1].Name;
-                    //MessageBox.Show(file.FullName);
-                    System.IO.File.Copy(@files[files.Length - 1].FullName, @strDest, true);
-                    //file.Attributes = FileAttributes.Normal;
-                    fileName = files[files.Length - 1].Name;
+                    fileName_Ext = file.Name.Split(fileExt);
+                    strTmp = Regex.Replace(fileName_Ext[0], @"\D", "");
+                    if (!string.IsNullOrEmpty(strTmp))
+                    {
+                        if (int.Parse(strTmp) > maxNum)
+                        {
+                            maxNum = int.Parse(strTmp);
+                            fileToSend = file;
+                        }
+                    }
+
+
+
+                    //if (file.Name.Contains((files.Length).ToString()))
+                    //{
+                    //}
                 }
 
-                MainWindow mainWindow = MainWindow.mainWindowInstance;
+
+                System.Diagnostics.Debug.Write(fileToSend.FullName);
+                string strDest = resultFolder + fileToSend.Name;
+                //MessageBox.Show(file.FullName);
+                System.IO.File.Copy(fileToSend.FullName, @strDest, true);
+                //file.Attributes = FileAttributes.Normal;
+                fileName = fileToSend.Name;
+
+
                 mainWindow.SendAttachedMail();
             }
 

@@ -32,8 +32,8 @@ namespace TimeSlice
         const string shareFolderFile = "shareFolder.txt";
         string[] textValue, shareTextValue;
         string fileName = "";
-        string fileExt = ".mp4";
-        string sendFile = "2.mp4";
+        public string fileExt = ".mp4";
+        string sendFile = "1.mp4";
 
         int totalFile = 0;
 
@@ -53,7 +53,7 @@ namespace TimeSlice
         string serverID = "";
         string serverPW = "";
 
-        bool isShareFolder = false;
+        bool isShareFolder = true;
 
         public MainWindow()
         {
@@ -69,6 +69,8 @@ namespace TimeSlice
             serverURL = @"\\SHKO\sh_공유폴더";
             serverID = "SEUNGHEEKO";
             serverPW = "sh";
+            ReadTextFile(formatFile);
+            fileExt = textValue[0];
 
             ReadTextFile(shareFolderFile);
             GetShareFolderTextValue();
@@ -179,7 +181,7 @@ namespace TimeSlice
             emailSendButton.Visibility = Visibility.Visible;
         }
 
-        private void ResetWindow()
+        public void ResetWindow()
         {
             // 전체 화면 원상복귀
             imgComposite.Opacity = 1;
@@ -203,17 +205,19 @@ namespace TimeSlice
             popupWindow.Closed += PopupWindow_Closed;
             popupWindow.Show();
             isLoading = false;
-            SetLoadingBar();
+            //SetLoadingBar();
+            SetLoadingBar(isLoading);
         }
         private void PopupWindow_Closed(object sender, EventArgs e)
         {
-            popupWindow.Dispatcher.InvokeShutdown();
+            //popupWindow.Dispatcher.InvokeShutdown();
             try
             {
-                Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
-                {
-                    ResetWindow();
-                }));
+                ResetWindow();
+                //Dispatcher.Invoke(DispatcherPriority.Normal, new Action(delegate
+                //{
+                //    ResetWindow();
+                //}));
             }
             catch (Exception ex)
             {
@@ -281,55 +285,104 @@ namespace TimeSlice
             isLoading = true;
             SetLoadingBar(true);
 
-            bool mailSuccess = false;
-            string mailTo = emailTextBox.Text;
-
-            _sendMailThread = null;
-            _sendMailThread = new Thread(new ThreadStart(() =>
-            {
-                EmailService emailService = new EmailService();
-
-
-                if (isShareFolder)
-                {
-                    if (string.IsNullOrEmpty(sendFile))
-                        mailSuccess = false;
-                    else
-                    {
-                        if (System.IO.File.Exists(filePath + sendFile))
-                        {
-                            try
-                            {
-                                mailSuccess = emailService.SendEmail(mailTo, filePath + sendFile);
-
-                            }
-
-                            catch (System.IO.IOException ex)
-                            {
-                                MessageBox.Show(ex.Message);
-                                ResetWindow();
-                            }
-                        }
-                        else
-                            mailSuccess = false;
-                    }
-                }
-                else
-                {
-                    mailSuccess = emailService.SendEmail(mailTo, filePath + sendFile);
-                }
-
-                ShowPopupMessage(mailSuccess);
-
-                System.Windows.Threading.Dispatcher.Run();
-            }));
-            _sendMailThread.SetApartmentState(ApartmentState.STA);
-            _sendMailThread.IsBackground = true;
 
             if (isShareFolder)
                 connectShareFolder();
             else
-                _sendMailThread.Start();
+                SendMail();
+            //_sendMailThread = null;
+            //_sendMailThread = new Thread(new ThreadStart(() =>
+            //{
+            //    EmailService emailService = new EmailService();
+
+
+            //    if (isShareFolder)
+            //    {
+            //        if (string.IsNullOrEmpty(sendFile))
+            //            mailSuccess = false;
+            //        else
+            //        {
+            //            if (System.IO.File.Exists(filePath + sendFile))
+            //            {
+            //                try
+            //                {
+            //                    //mailSuccess = emailService.SendEmail(mailTo, filePath + sendFile);
+            //                    emailService.SendEmail(mailTo, filePath + sendFile);
+
+            //                }
+
+            //                catch (System.IO.IOException ex)
+            //                {
+            //                    MessageBox.Show(ex.Message);
+            //                    ResetWindow();
+            //                }
+            //            }
+            //            else
+            //                mailSuccess = false;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        //mailSuccess = emailService.SendEmail(mailTo, filePath + sendFile);
+            //        emailService.SendEmail(mailTo, filePath + sendFile);
+            //    }
+
+            //    //ShowPopupMessage(mailSuccess);
+
+            //    System.Windows.Threading.Dispatcher.Run();
+            //}));
+            //_sendMailThread.SetApartmentState(ApartmentState.STA);
+            //_sendMailThread.IsBackground = true;
+
+
+            //else
+            //    _sendMailThread.Start();
+        }
+
+        public void SendMail()
+        {
+            bool mailSuccess = false;
+            string mailTo = emailTextBox.Text;
+
+            EmailService emailService = new EmailService();
+
+
+            if (isShareFolder)
+            {
+                if (string.IsNullOrEmpty(sendFile))
+                    mailSuccess = false;
+                else
+                {
+                    if (System.IO.File.Exists(filePath + sendFile))
+                    {
+                        try
+                        {
+                            //mailSuccess = emailService.SendEmail(mailTo, filePath + sendFile);
+                            emailService.SendEmail(mailTo, filePath + sendFile);
+
+                        }
+
+                        catch (System.IO.IOException ex)
+                        {
+                            MessageBox.Show(ex.Message);
+                            ResetWindow();
+                        }
+                    }
+                    else
+                        mailSuccess = false;
+                }
+            }
+            else
+            {
+                //mailSuccess = emailService.SendEmail(mailTo, filePath + sendFile);
+                emailService.SendEmail(mailTo, filePath + sendFile);
+            }
+        }
+
+        public void MailResult(bool isSuccess)
+        {
+            ShowPopupMessage(isSuccess);
+            
         }
 
         private void mainWindow_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -340,8 +393,9 @@ namespace TimeSlice
 
         public void SendAttachedMail()
         {
-            if(_sendMailThread != null)
-                _sendMailThread.Start();
+            //if(_sendMailThread != null)
+            //    _sendMailThread.Start();
+            SendMail();
         }
 
         // 공유폴더에 접근해 최신파일 가져와 내부 폴더에 저장
