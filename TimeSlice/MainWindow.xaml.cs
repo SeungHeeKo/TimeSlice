@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -53,7 +54,7 @@ namespace TimeSlice
         string serverID = "";
         string serverPW = "";
 
-        bool isShareFolder = true;
+        bool isShareFolder = false;
 
         public MainWindow()
         {
@@ -278,6 +279,67 @@ namespace TimeSlice
             VirtualKeyboard.Close();
         }
 
+        public string GetShareFolderFile(string shareFolder, string resultFolder)
+        {
+            DirectoryInfo dirInfo = new DirectoryInfo(shareFolder);
+
+            FileInfo[] files = dirInfo.GetFiles();
+
+            string fileName = "";
+
+            int maxNum = 0;
+            MainWindow mainWindow = MainWindow.mainWindowInstance;
+            Char[] fileExt = mainWindow.fileExt.ToCharArray();
+            string[] fileName_Ext = new string[2];
+            string strTmp = "";
+            FileInfo fileToSend = files[files.Length - 1];
+
+            if (files != null)
+            {
+                string strCurrentDirectory = System.IO.Directory.GetCurrentDirectory();
+                if (!System.IO.Directory.Exists(resultFolder))
+                {
+                    System.IO.Directory.CreateDirectory(resultFolder);
+                }
+
+                foreach (FileInfo file in files)
+                {
+                    fileName_Ext = file.Name.Split(fileExt);
+                    strTmp = Regex.Replace(fileName_Ext[1], @"\D", "");
+                    if (!string.IsNullOrEmpty(strTmp))
+                    {
+                        if (int.Parse(strTmp) > maxNum)
+                        {
+                            maxNum = int.Parse(strTmp);
+                            fileToSend = file;
+                        }
+                    }
+
+
+
+                    //if (file.Name.Contains((files.Length).ToString()))
+                    //{
+                    //}
+                }
+
+
+                System.Diagnostics.Debug.Write(fileToSend.FullName);
+                string strDest = resultFolder + fileToSend.Name;
+                //MessageBox.Show(file.FullName);
+                //System.IO.File.Copy(fileToSend.FullName, @strDest, true);
+                //file.Attributes = FileAttributes.Normal;
+                fileName = fileToSend.Name;
+
+                string mailTo = emailTextBox.Text;
+                EmailService emailService = new EmailService();
+
+                emailService.SendEmail(mailTo, resultFolder   + fileName);
+            }
+
+            return fileName;
+        }
+
+
         private void emailSendButton_Click(object sender, RoutedEventArgs e)
         {
             emailSendButton.IsEnabled = false;
@@ -374,8 +436,9 @@ namespace TimeSlice
             }
             else
             {
+                GetShareFolderFile(filePath, filePath);
                 //mailSuccess = emailService.SendEmail(mailTo, filePath + sendFile);
-                emailService.SendEmail(mailTo, filePath + sendFile);
+                
             }
         }
 
