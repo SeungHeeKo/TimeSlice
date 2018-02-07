@@ -42,7 +42,7 @@ namespace TimeSlice
 
         private bool isFirst = true;
         private bool isLoading = false;
-
+        private bool afterPopup = false;
 
 
         SharedAPI sharedAPI;
@@ -206,6 +206,7 @@ namespace TimeSlice
             popupWindow.Closed += PopupWindow_Closed;
             popupWindow.Show();
             isLoading = false;
+            afterPopup = true;
             //SetLoadingBar();
             SetLoadingBar(isLoading);
         }
@@ -452,6 +453,12 @@ namespace TimeSlice
         {
             Keyboard.ClearFocus();
             DisableKeyBoard();
+
+            if (afterPopup)
+            {
+                afterPopup = false;
+                ResetWindow();
+            }
         }
 
         public void SendAttachedMail()
