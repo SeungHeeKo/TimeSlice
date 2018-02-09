@@ -14,7 +14,7 @@ namespace TimeSlice
     {   // ktlivesite@gmail.com
         MailMessage mail;
         SmtpClient smtpClient;
-        const string senderMail = "livesitekt@gmail.com";
+        const string senderMail = "icehockey@ktlivesite.com";
         const string senderPassword = "tekton0405";
         const string mailSubject = "KT 5G Time-Slice";
 
@@ -26,7 +26,7 @@ namespace TimeSlice
             try
             {
                 mail = new MailMessage();
-                smtpClient = new SmtpClient("smtp.gmail.com", 587);
+                smtpClient = new SmtpClient("smtp.cafe24.com", 587);
                 smtpClient.UseDefaultCredentials = false;
                 smtpClient.EnableSsl = true;
                 //smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
