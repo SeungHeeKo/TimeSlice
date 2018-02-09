@@ -194,6 +194,11 @@ namespace TimeSlice
             emailTextBox.Text = "";
             emailSendButton.Visibility = Visibility.Hidden;
             emailSendButton.IsEnabled = true;
+
+            if (afterPopup)
+            {
+                afterPopup = false;
+            }
         }
 
         private void emailTextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -457,6 +462,7 @@ namespace TimeSlice
             if (afterPopup)
             {
                 afterPopup = false;
+                popupWindow.Close();
                 ResetWindow();
             }
         }
